@@ -1,0 +1,58 @@
+<!-- update.html -->
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Update Task</title>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Update Task</h2>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('update', id=task.id) }}" method="POST">
+                        <div class="form-group">
+                            <label for="nom_edition">Nom Edition</label>
+                            <input type="text" class="form-control" id="nom_edition" name="nom_edition" value="{{ task.nom_edition }}" placeholder="Nom Edition" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="type_edition">Type Edition</label>
+                            <select class="form-control" id="type_edition" name="type_edition" required>
+                                <option value="RECTO" {% if task.type_edition == 'RECTO' %}selected{% endif %}>RECTO</option>
+                                <option value="VERSO" {% if task.type_edition == 'VERSO' %}selected{% endif %}>VERSO</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="type_envoie">Type d'envoie</label>
+                            <input type="text" class="form-control" id="type_envoie" name="type_envoie" value="{{ task.type_envoie }}" placeholder="Type d'envoie" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nombre_page_destinataire">Nombre Page par Destinataire</label>
+                            <input type="number" class="form-control" id="nombre_page_destinataire" name="nombre_page_destinataire" value="{{ task.nombre_page_destinataire }}" placeholder="Nombre Page par Destinataire" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nombre_destinataires">Nombre Destinataires</label>
+                            <input type="number" class="form-control" id="nombre_destinataires" name="nombre_destinataires" value="{{ task.nombre_destinataires }}" placeholder="Nombre Destinataires" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nombre_page">Nombre Page</label>
+                            <input type="number" class="form-control" id="nombre_page" name="nombre_page" value="{{ task.nombre_page }}" placeholder="Nombre Page" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Update Task</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

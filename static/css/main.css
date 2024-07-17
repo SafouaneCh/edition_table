@@ -1,0 +1,133 @@
+:root {
+    --main-bg-color: #FFFFFF;  /* Changed to white */
+    --sidebar-bg-color: #1E2130;
+    --sidebar-text-color: #FFFFFF;
+    --sidebar-hover-color: #2A2D3E;
+    --content-bg-color: #F8F9FA;  /* Light gray for content area */
+    --table-header-bg: #f2f2f2;
+    --table-border-color: #ddd;
+    --button-bg-color: #007BFF;  /* Bootstrap primary color */
+    --button-hover-color: #0056B3;  /* Darker shade for hover */
+    --export-button-color: #28A745;  /* Bootstrap success color */
+    --export-button-hover-color: #218838;  /* Darker shade for hover */
+}
+
+body {
+    background-color: var(--main-bg-color);
+}
+
+.content {
+    background-color: var(--content-bg-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+}
+
+
+
+.wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    background: var(--sidebar-bg-color);
+    color: var(--sidebar-text-color);
+    transition: all 0.3s;
+    border-radius: 0 10px 10px 0;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+    background: var(--sidebar-bg-color);
+}
+
+#sidebar ul.components {
+    padding: 20px 0;
+}
+
+#sidebar ul li a {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    display: block;
+    color: var(--sidebar-text-color);
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+#sidebar ul li a:hover {
+    color: var(--sidebar-text-color);
+    background: var(--sidebar-hover-color);
+}
+
+#sidebar ul li.active > a {
+    background: var(--sidebar-hover-color);
+}
+
+#content {
+    width: 100%;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.content {
+    background-color: var(--content-bg-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom table styles */
+.table-custom {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-custom thead th {
+    background-color: var(--table-header-bg);
+    border-color: var(--table-border-color);
+}
+
+.table-custom td, .table-custom th {
+    border: 1px solid var(--table-border-color);
+}
+
+/* Custom button styles */
+.btn-export {
+    background-color: var(--export-button-color);
+    border-color: var(--export-button-color);
+}
+
+.btn-export:hover {
+    background-color: var(--export-button-hover-color);
+    border-color: var(--export-button-hover-color);
+}
+
+/* Sidebar toggle button */
+#sidebarCollapse {
+    background-color: var(--sidebar-bg-color);
+    color: var(--sidebar-text-color);
+}
+
+#sidebarCollapse:hover {
+    background-color: var(--sidebar-hover-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+    #content {
+        margin-left: 0;
+    }
+}
