@@ -5,11 +5,27 @@ import pandas as pd
 from io import BytesIO
 from extensions import db
 from models import Lot, LotEntry
+from flask_cors import CORS
+
+#CORS(App, resources={r"/lot-details/*": {"origins": "*"}})
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db.init_app(app)
 migrate = Migrate(app, db)
+
+
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+    db.init_app(app)
+    migrate = Migrate(app, db)
+    CORS(app, resources={r"/lot-details/*": {"origins": "*"}})
+
+    with app.app_context():
+        test_db_connection()
+
+    return app
 
 # Rest of your code remains the same
 
@@ -162,23 +178,46 @@ def ajouter_lot():
 
 @app.route('/lot-details/<int:lot_id>')
 def lot_details(lot_id):
-    print(f"Requête reçue pour le lot ID: {lot_id}")
-    lot = Lot.query.get_or_404(lot_id)
-    entries = LotEntry.query.filter_by(lot_id=lot_id).all()
+    app.logger.info(f"Début de lot_details pour lot_id: {lot_id}")
+    try:
+        lot = Lot.query.get_or_404(lot_id)
+        app.logger.info(f"Lot trouvé: {lot}")
+        entries = LotEntry.query.filter_by(lot_id=lot_id).all()
+        app.logger.info(f"Nombre d'entrées trouvées: {len(entries)}")
 
-    response_data = {
-        'numero': lot.numero,
-        'entries': [{
-            'nom_edition': entry.nom_edition,
-            'type_edition': entry.type_edition,
-            'type_envoie': entry.type_envoie,
-            'nombre_page_destinataire': entry.nombre_page_destinataire,
-            'nombre_destinataires': entry.nombre_destinataires,
-            'nombre_page': entry.nombre_page
-        } for entry in entries]
-    }
-    print("Données renvoyées:", response_data)
-    return jsonify(response_data)
+        response_data = {
+            'numero': lot.numero,
+            'entries': [{
+                'nom_edition': entry.nom_edition,
+                'type_edition': entry.type_edition,
+                'type_envoie': entry.type_envoie,
+                'nombre_page_destinataire': entry.nombre_page_destinataire,
+                'nombre_destinataires': entry.nombre_destinataires,
+                'nombre_page': entry.nombre_page
+            } for entry in entries]
+        }
+        app.logger.info(f"Données de réponse préparées: {response_data}")
+        return jsonify(response_data)
+    except Exception as e:
+        app.logger.error(f"Erreur dans lot_details: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Erreur non gérée: {str(e)}")
+    return jsonify(error=str(e)), 500
+
+
+
+def test_db_connection():
+    try:
+        db.session.query("1").from_statement("SELECT 1").all()
+        app.logger.info("Connexion à la base de données réussie")
+    except Exception as e:
+        app.logger.error(f"Erreur de connexion à la base de données : {str(e)}")
+
+
+
 
 
 if __name__ == "__main__":
