@@ -8,8 +8,7 @@
     <div class="card mb-4">
         <div class="card-header">
             <h2>Lot #{{ lot.numero }} - {{ lot.date_creation.strftime('%Y-%m-%d') }}</h2>
-            <!-- Débogage -->
-            <p>Nombre d'entrées : {{ lot.entries.count() }}</p>
+            <p>Nombre d'entrées : {{ lot.entries | length }}</p>
         </div>
         <div class="card-body">
             <table class="table table-striped">
