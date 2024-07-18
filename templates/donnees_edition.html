@@ -5,18 +5,33 @@
 <script>
     function voirDetails(lotId) {
         console.log('voirDetails appelé avec lotId:', lotId);
-        fetch(`/lot-details/${lotId}`)
+        fetch(`/lot-details/${lotId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+        })
             .then(response => {
-                console.log('Réponse reçue:', response);
-                return response.json();
+                console.log('Réponse brute:', response);
+                if (!response.ok) {
+                    throw new Error('Réponse réseau non OK');
+                }
+                return response.text();
+            })
+            .then(text => {
+                console.log('Texte de la réponse:', text);
+                return JSON.parse(text);
             })
             .then(data => {
-                console.log('Données reçues:', data);
+                console.log('Données parsées:', data);
                 let modal = createDetailModal(data);
                 document.body.appendChild(modal);
                 $(modal).modal('show');
             })
-            .catch(error => console.error('Erreur:', error));
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur s\'est produite lors de la récupération des détails du lot.');
+            });
     }
 
     function createDetailModal(data) {
@@ -88,7 +103,7 @@
             <td>{{ lot.numero }}</td>
             <td>{{ lot.date_creation.strftime('%Y-%m-%d') }}</td>
             <td>
-                <a href="#" class="btn btn-sm btn-primary voir-details" data-lot-id="{{ lot.id }}">Voir </a>
+                <a href="#" class="btn btn-sm btn-primary voir-details" onclick="voirDetails({{ lot.id }})">Voir</a>
                 <a href="#" class="btn btn-sm btn-warning">Modifier</a>
                 <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
             </td>
