@@ -1,43 +1,12 @@
 {% extends 'base.html' %}
 
+{% block head %}
+<title>Accueil</title>
+{% endblock %}
+
 {% block body %}
 <div class="container mt-4">
-    <h1 class="mb-4">Liste des Lots</h1>
-
-    {% for lot in lots %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>Lot #{{ lot.numero }} - {{ lot.date_creation.strftime('%Y-%m-%d') }}</h2>
-            <!-- Débogage -->
-            <p>Nombre d'entrées : {{ lot.entries.count() }}</p>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Nom Edition</th>
-                    <th>Type Edition</th>
-                    <th>Type d'envoie</th>
-                    <th>Nombre Page par Destinataire</th>
-                    <th>Nombre Destinataires</th>
-                    <th>Nombre Page</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for entry in lot.entries %}
-                <tr>
-                    <td>{{ entry.nom_edition }}</td>
-                    <td>{{ entry.type_edition }}</td>
-                    <td>{{ entry.type_envoie }}</td>
-                    <td>{{ entry.nombre_page_destinataire }}</td>
-                    <td>{{ entry.nombre_destinataires }}</td>
-                    <td>{{ entry.nombre_page }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endfor %}
+    <h1>Bienvenue sur l'application CNSS</h1>
+    <p>Utilisez le menu latéral pour naviguer dans l'application.</p>
 </div>
 {% endblock %}

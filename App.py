@@ -28,11 +28,12 @@ class Todo(db.Model):
 
 @app.route('/')
 def index():
-    lots = Lot.query.order_by(Lot.date_creation.desc()).all()
-    for lot in lots:
-        lot.entries = list(lot.entries)  # Convert to list
-    return render_template('index.html', lots=lots)
+    return render_template('index.html')
 
+@app.route('/donnees-edition')
+def donnees_edition():
+    lots = Lot.query.order_by(Lot.date_creation.desc()).all()
+    return render_template('donnees_edition.html', lots=lots)
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -159,6 +160,25 @@ def ajouter_lot():
 
     return render_template('ajouter_lot.html')
 
+@app.route('/lot-details/<int:lot_id>')
+def lot_details(lot_id):
+    print(f"Requête reçue pour le lot ID: {lot_id}")
+    lot = Lot.query.get_or_404(lot_id)
+    entries = LotEntry.query.filter_by(lot_id=lot_id).all()
+
+    response_data = {
+        'numero': lot.numero,
+        'entries': [{
+            'nom_edition': entry.nom_edition,
+            'type_edition': entry.type_edition,
+            'type_envoie': entry.type_envoie,
+            'nombre_page_destinataire': entry.nombre_page_destinataire,
+            'nombre_destinataires': entry.nombre_destinataires,
+            'nombre_page': entry.nombre_page
+        } for entry in entries]
+    }
+    print("Données renvoyées:", response_data)
+    return jsonify(response_data)
 
 
 if __name__ == "__main__":
