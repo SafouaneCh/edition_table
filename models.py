@@ -5,6 +5,7 @@ class Lot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     numero = db.Column(db.String(50), unique=True, nullable=False)
     date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    entries = db.relationship('LotEntry', backref='lot', lazy='dynamic')
 
 class LotEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
