@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block head %}
+<title>Accueil</title>
+{% endblock %}
+
 {% block body %}
 <div class="container mt-4">
     <h1 class="mb-4">Liste des Lots</h1>
@@ -8,7 +12,8 @@
     <div class="card mb-4">
         <div class="card-header">
             <h2>Lot #{{ lot.numero }} - {{ lot.date_creation.strftime('%Y-%m-%d') }}</h2>
-            <p>Nombre d'entrées : {{ lot.entries | length }}</p>
+            <!-- Débogage -->
+            <p>Nombre d'entrées : {{ lot.entries.count() }}</p>
         </div>
         <div class="card-body">
             <table class="table table-striped">

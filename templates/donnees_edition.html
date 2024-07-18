@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Données d'édition</title>
+<script>
+    function voirDetails(lotId) {
+        console.log('voirDetails appelé avec lotId:', lotId);
+        fetch(`/lot-details/${lotId}`)
+            .then(response => {
+                console.log('Réponse reçue:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Données reçues:', data);
+                let modal = createDetailModal(data);
+                document.body.appendChild(modal);
+                $(modal).modal('show');
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+
+    function createDetailModal(data) {
+        let modalContent = `
+        <div class="modal fade" id="detailModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Détails du Lot ${data.numero}</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nom Édition</th>
+                                    <th>Type Édition</th>
+                                    <th>Type Envoi</th>
+                                    <th>Nombre Pages Destinataire</th>
+                                    <th>Nombre Destinataires</th>
+                                    <th>Nombre Pages</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.entries.map(entry => `
+                                    <tr>
+                                        <td>${entry.nom_edition}</td>
+                                        <td>${entry.type_edition}</td>
+                                        <td>${entry.type_envoie}</td>
+                                        <td>${entry.nombre_page_destinataire}</td>
+                                        <td>${entry.nombre_destinataires}</td>
+                                        <td>${entry.nombre_page}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+        let modalElement = document.createElement('div');
+        modalElement.innerHTML = modalContent;
+        return modalElement.firstChild;
+    }
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">Données d'édition</h1>
+
+    <!-- Débogage -->
+    <p>Nombre de lots : {{ lots|length }}</p>
+
+    {% if lots %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Numéro du Lot</th>
+            <th>Date de création</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for lot in lots %}
+        <tr>
+            <td>{{ lot.numero }}</td>
+            <td>{{ lot.date_creation.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <a href="#" class="btn btn-sm btn-primary voir-details" data-lot-id="{{ lot.id }}">Voir </a>
+                <a href="#" class="btn btn-sm btn-warning">Modifier</a>
+                <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Aucun lot trouvé.</p>
+    {% endif %}
+</div>
+{% endblock %}

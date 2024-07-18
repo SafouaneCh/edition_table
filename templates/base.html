@@ -33,7 +33,10 @@
                 </a>
                 <ul class="collapse list-unstyled" id="taskSubmenu">
                     <li>
-                        <a href="{{ url_for('ajouter_lot') }}">Ajouter un nouveau Lot</a>
+                        <a href="/tasks">Données d'édition</a>
+                    </li>
+                    <li>
+                        <a href="/ajouter-lot">Ajouter un nouveau Lot</a>
                     </li>
                 </ul>
             </li>
@@ -85,11 +88,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
 <!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    $(document).ready(function () {
-        $('#sidebarCollapse').on('click', function () {
-            $('#sidebar, #content').toggleClass('active');
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.voir-details').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const lotId = this.getAttribute('data-lot-id');
+                voirDetails(lotId);
+            });
         });
     });
 </script>
