@@ -8,18 +8,43 @@
 <div class="container mt-4">
     <h1 class="mb-4">Ajouter un nouveau Lot</h1>
 
-    <form id="lotForm" action="{{ url_for('ajouter_lot') }}" method="POST">
+    <form id="lotForm">
+        <div class="mb-3">
+            <label for="numero_lot" class="form-label">Numéro du Lot</label>
+            <input type="number" class="form-control" id="numero_lot" name="numero_lot" required>
+        </div>
         <div id="lotEntries">
             <!-- Les entrées du lot seront ajoutées ici dynamiquement -->
         </div>
         <button type="button" class="btn btn-secondary mt-3" onclick="addEntry()">Ajouter une entrée</button>
-        <button type="submit" class="btn btn-primary mt-3">Sauvegarder le Lot</button>
+        <button type="button" class="btn btn-primary mt-3" onclick="previewAndConfirm()">Sauvegarder le Lot</button>
     </form>
+
+    <div id="preview" class="mt-4" style="display: none;">
+        <h2>Aperçu du Lot</h2>
+        <p><strong>Numéro du Lot:</strong> <span id="previewLotNumber"></span></p>
+        <p><strong>Date de création:</strong> <span id="previewLotDate"></span></p>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Nom Edition</th>
+                <th>Type Edition</th>
+                <th>Type d'envoie</th>
+                <th>Nombre Page par Destinataire</th>
+                <th>Nombre Destinataires</th>
+                <th>Nombre Page</th>
+            </tr>
+            </thead>
+            <tbody id="previewBody">
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-success" onclick="confirmAndSave()">Confirmer et Ajouter au Tableau Principal</button>
+        <button type="button" class="btn btn-danger" onclick="cancelSave()">Annuler</button>
+    </div>
 </div>
 
 <script>
     let entryCount = 0;
-
     function addEntry() {
         const entryHtml = `
     <div class="row g-3 mb-3">
@@ -28,7 +53,6 @@
         </div>
         <div class="col-md-2">
             <select class="form-select" name="type_edition_${entryCount}" required>
-                <option value="">Type Edition</option>
                 <option value="RECTO">RECTO</option>
                 <option value="VERSO">VERSO</option>
             </select>
@@ -50,6 +74,57 @@
 
         document.getElementById('lotEntries').insertAdjacentHTML('beforeend', entryHtml);
         entryCount++;
+    }
+
+    function previewAndConfirm() {
+        const form = document.getElementById('lotForm');
+        const preview = document.getElementById('preview');
+        const previewBody = document.getElementById('previewBody');
+
+        document.getElementById('previewLotNumber').textContent = form.numero_lot.value;
+        document.getElementById('previewLotDate').textContent = new Date().toLocaleDateString();
+
+        previewBody.innerHTML = '';
+
+        for (let i = 0; i < entryCount; i++) {
+            const row = `
+        <tr>
+            <td>${form['nom_edition_' + i].value}</td>
+            <td>${form['type_edition_' + i].value}</td>
+            <td>${form['type_envoie_' + i].value}</td>
+            <td>${form['nombre_page_destinataire_' + i].value}</td>
+            <td>${form['nombre_destinataires_' + i].value}</td>
+            <td>${form['nombre_page_' + i].value}</td>
+        </tr>
+        `;
+            previewBody.insertAdjacentHTML('beforeend', row);
+        }
+
+        preview.style.display = 'block';
+        form.style.display = 'none';
+    }
+
+    function confirmAndSave() {
+        const formData = new FormData(document.getElementById('lotForm'));
+
+        fetch('{{ url_for("ajouter_lot") }}', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Le lot a été ajouté avec succès au tableau principal !');
+                    window.location.href = '{{ url_for("index") }}';
+                } else {
+                    alert('Une erreur est survenue lors de l\'ajout du lot : ' + data.error);
+                }
+            });
+    }
+
+    function cancelSave() {
+        document.getElementById('preview').style.display = 'none';
+        document.getElementById('lotForm').style.display = 'block';
     }
 
     // Ajouter une première entrée au chargement de la page

@@ -1,80 +1,41 @@
 {% extends 'base.html' %}
 
-{% block head %}
-<title>Données d'édition</title>
-{% endblock %}
-
 {% block body %}
 <div class="container mt-4">
-    <h1 class="mb-4">Données d'édition</h1>
-    <button class="btn btn-primary float-end mb-3" onclick="exportToExcel()">Export to Excel</button>
+    <h1 class="mb-4">Liste des Lots</h1>
 
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Date Created</th>
-            <th>Nom Edition</th>
-            <th>Type Edition</th>
-            <th>Type d'envoie</th>
-            <th>Nombre Page par Destinataire</th>
-            <th>Nombre Destinataires</th>
-            <th>Nombre Page</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for task in tasks %}
-        <tr>
-            <td>{{ task.date_created.strftime('%Y-%m-%d %H:%M:%S') if task.date_created else 'N/A' }}</td>
-            <td>{{ task.nom_edition }}</td>
-            <td>{{ task.type_edition }}</td>
-            <td>{{ task.type_envoie }}</td>
-            <td>{{ task.nombre_page_destinataire }}</td>
-            <td>{{ task.nombre_destinataires }}</td>
-            <td>{{ task.nombre_page }}</td>
-            <td>
-                <a href="{{ url_for('delete', id=task.id) }}" class="btn btn-danger btn-sm">Delete</a>
-                <a href="{{ url_for('update', id=task.id) }}" class="btn btn-warning btn-sm">Update</a>
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <form action="/" method="POST" class="mt-4">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <input type="text" class="form-control" name="nom_edition" placeholder="Nom Edition" required>
-            </div>
-            <div class="col-md-6">
-                <select class="form-select" name="type_edition" required>
-                    <option value="">Choose Type Edition</option>
-                    <option value="RECTO">RECTO</option>
-                    <option value="VERSO">VERSO</option>
-                </select>
-            </div>
-            <div class="col-md-6">
-                <input type="text" class="form-control" name="type_envoie" placeholder="Type d'envoie" required>
-            </div>
-            <div class="col-md-6">
-                <input type="number" class="form-control" name="nombre_page_destinataire" placeholder="Nombre Page par Destinataire" required>
-            </div>
-            <div class="col-md-6">
-                <input type="number" class="form-control" name="nombre_destinataires" placeholder="Nombre Destinataires" required>
-            </div>
-            <div class="col-md-6">
-                <input type="number" class="form-control" name="nombre_page" placeholder="Nombre Page" required>
-            </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-success">Add Task</button>
-            </div>
+    {% for lot in lots %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Lot #{{ lot.numero }} - {{ lot.date_creation.strftime('%Y-%m-%d') }}</h2>
         </div>
-    </form>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Nom Edition</th>
+                    <th>Type Edition</th>
+                    <th>Type d'envoie</th>
+                    <th>Nombre Page par Destinataire</th>
+                    <th>Nombre Destinataires</th>
+                    <th>Nombre Page</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for entry in lot.entries %}
+                <tr>
+                    <td>{{ entry.nom_edition }}</td>
+                    <td>{{ entry.type_edition }}</td>
+                    <td>{{ entry.type_envoie }}</td>
+                    <td>{{ entry.nombre_page_destinataire }}</td>
+                    <td>{{ entry.nombre_destinataires }}</td>
+                    <td>{{ entry.nombre_page }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
 </div>
-
-<script>
-    function exportToExcel() {
-        window.location.href = "{{ url_for('export_excel') }}";
-    }
-</script>
 {% endblock %}

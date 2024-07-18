@@ -1,14 +1,17 @@
-from flask import Flask, render_template, request, redirect, send_file, url_for
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, request, redirect, send_file, url_for, jsonify
 from flask_migrate import Migrate
 from datetime import datetime
 import pandas as pd
 from io import BytesIO
+from extensions import db
+from models import Lot, LotEntry
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
+
+# Rest of your code remains the same
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -23,34 +26,10 @@ class Todo(db.Model):
     def __repr__(self):
         return f'<Task {self.id}>'
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/')
 def index():
-    if request.method == 'POST':
-        nom_edition = request.form['nom_edition']
-        type_edition = request.form['type_edition']
-        type_envoie = request.form['type_envoie']
-        nombre_page_destinataire = request.form['nombre_page_destinataire']
-        nombre_destinataires = request.form['nombre_destinataires']
-        nombre_page = request.form['nombre_page']
-
-        new_task = Todo(
-            nom_edition=nom_edition,
-            type_edition=type_edition,
-            type_envoie=type_envoie,
-            nombre_page_destinataire=nombre_page_destinataire,
-            nombre_destinataires=nombre_destinataires,
-            nombre_page=nombre_page
-        )
-
-        try:
-            db.session.add(new_task)
-            db.session.commit()
-            return redirect('/')
-        except Exception as e:
-            return f'There was an issue adding your task: {e}'
-    else:
-        tasks = Todo.query.order_by(Todo.date_created).all()
-        return render_template('index.html', tasks=tasks)
+    lots = Lot.query.order_by(Lot.date_creation.desc()).all()
+    return render_template('index.html', lots=lots)
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -134,31 +113,46 @@ def export_excel():
 
 
 
+
+
+from flask import jsonify, request, render_template
+from datetime import datetime
+
 @app.route('/ajouter-lot', methods=['GET', 'POST'])
 def ajouter_lot():
     if request.method == 'POST':
-        # Traiter les données du formulaire
-        for key, value in request.form.items():
-            if key.startswith('nom_edition_'):
-                index = key.split('_')[-1]
-                nom_edition = value
-                type_edition = request.form.get(f'type_edition_{index}')
-                type_envoie = request.form.get(f'type_envoie_{index}')
-                nombre_page_destinataire = request.form.get(f'nombre_page_destinataire_{index}')
-                nombre_destinataires = request.form.get(f'nombre_destinataires_{index}')
-                nombre_page = request.form.get(f'nombre_page_{index}')
+        try:
+            numero_lot = request.form.get('numero_lot')
+            new_lot = Lot(numero=numero_lot)
+            db.session.add(new_lot)
+            db.session.flush()  # Pour obtenir l'ID du lot
 
-                # Créer une nouvelle entrée dans la base de données
-                new_entry = Task(nom_edition=nom_edition,
-                                 type_edition=type_edition,
-                                 type_envoie=type_envoie,
-                                 nombre_page_destinataire=nombre_page_destinataire,
-                                 nombre_destinataires=nombre_destinataires,
-                                 nombre_page=nombre_page)
-                db.session.add(new_entry)
+            for key, value in request.form.items():
+                if key.startswith('nom_edition_'):
+                    index = key.split('_')[-1]
+                    nom_edition = value
+                    type_edition = request.form.get(f'type_edition_{index}')
+                    type_envoie = request.form.get(f'type_envoie_{index}')
+                    nombre_page_destinataire = request.form.get(f'nombre_page_destinataire_{index}')
+                    nombre_destinataires = request.form.get(f'nombre_destinataires_{index}')
+                    nombre_page = request.form.get(f'nombre_page_{index}')
 
-        db.session.commit()
-        return redirect(url_for('index'))  # Rediriger vers la page principale après l'ajout
+                    new_entry = LotEntry(
+                        lot_id=new_lot.id,
+                        nom_edition=nom_edition,
+                        type_edition=type_edition,
+                        type_envoie=type_envoie,
+                        nombre_page_destinataire=nombre_page_destinataire,
+                        nombre_destinataires=nombre_destinataires,
+                        nombre_page=nombre_page
+                    )
+                    db.session.add(new_entry)
+
+            db.session.commit()
+            return jsonify({'success': True})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'success': False, 'error': str(e)})
 
     return render_template('ajouter_lot.html')
 
