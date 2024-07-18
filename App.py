@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, send_file
+from flask import Flask, render_template, request, redirect, send_file, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
@@ -131,6 +131,36 @@ def export_excel():
     # Set up the Http response
     output.seek(0)
     return send_file(output, as_attachment=True, download_name="tasks.xlsx")
+
+
+
+@app.route('/ajouter-lot', methods=['GET', 'POST'])
+def ajouter_lot():
+    if request.method == 'POST':
+        # Traiter les données du formulaire
+        for key, value in request.form.items():
+            if key.startswith('nom_edition_'):
+                index = key.split('_')[-1]
+                nom_edition = value
+                type_edition = request.form.get(f'type_edition_{index}')
+                type_envoie = request.form.get(f'type_envoie_{index}')
+                nombre_page_destinataire = request.form.get(f'nombre_page_destinataire_{index}')
+                nombre_destinataires = request.form.get(f'nombre_destinataires_{index}')
+                nombre_page = request.form.get(f'nombre_page_{index}')
+
+                # Créer une nouvelle entrée dans la base de données
+                new_entry = Task(nom_edition=nom_edition,
+                                 type_edition=type_edition,
+                                 type_envoie=type_envoie,
+                                 nombre_page_destinataire=nombre_page_destinataire,
+                                 nombre_destinataires=nombre_destinataires,
+                                 nombre_page=nombre_page)
+                db.session.add(new_entry)
+
+        db.session.commit()
+        return redirect(url_for('index'))  # Rediriger vers la page principale après l'ajout
+
+    return render_template('ajouter_lot.html')
 
 
 
