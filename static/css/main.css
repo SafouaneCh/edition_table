@@ -1,33 +1,26 @@
 :root {
-    --main-bg-color: #FFFFFF;  /* Changed to white */
+    --main-bg-color: #FFFFFF;
     --sidebar-bg-color: #1E2130;
     --sidebar-text-color: #FFFFFF;
     --sidebar-hover-color: #2A2D3E;
-    --content-bg-color: #F8F9FA;  /* Light gray for content area */
+    --content-bg-color: #F8F9FA;
     --table-header-bg: #f2f2f2;
     --table-border-color: #ddd;
-    --button-bg-color: #007BFF;  /* Bootstrap primary color */
-    --button-hover-color: #0056B3;  /* Darker shade for hover */
-    --export-button-color: #28A745;  /* Bootstrap success color */
-    --export-button-hover-color: #218838;  /* Darker shade for hover */
+    --button-bg-color: #007BFF;
+    --button-hover-color: #0056B3;
+    --export-button-color: #28A745;
+    --export-button-hover-color: #218838;
 }
 
 body {
     background-color: var(--main-bg-color);
 }
 
-.content {
-    background-color: var(--content-bg-color);
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-top: 20px;
-}
-
-
-
 .wrapper {
     display: flex;
+    width: 100%;
+    align-items: stretch;
+    position: relative;
     min-height: 100vh;
 }
 
@@ -38,10 +31,17 @@ body {
     color: var(--sidebar-text-color);
     transition: all 0.3s;
     border-radius: 0 10px 10px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    overflow-y: auto;
 }
 
 #sidebar.active {
     margin-left: -250px;
+    transform: translateX(-250px);
 }
 
 #sidebar .sidebar-header {
@@ -75,12 +75,19 @@ body {
     width: 100%;
     padding: 20px;
     transition: all 0.3s;
+    margin-left: 250px;
+}
+
+#content.active {
+    margin-left: 0;
 }
 
 .content {
     background-color: var(--content-bg-color);
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
 }
 
 /* Custom table styles */
@@ -123,9 +130,11 @@ body {
 @media (max-width: 768px) {
     #sidebar {
         margin-left: -250px;
+        transform: translateX(-250px);
     }
     #sidebar.active {
         margin-left: 0;
+        transform: translateX(0);
     }
     #content {
         margin-left: 0;

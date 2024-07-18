@@ -29,7 +29,10 @@ class Todo(db.Model):
 @app.route('/')
 def index():
     lots = Lot.query.order_by(Lot.date_creation.desc()).all()
+    for lot in lots:
+        lot.entries = list(lot.entries)  # Convert to list
     return render_template('index.html', lots=lots)
+
 
 @app.route('/delete/<int:id>')
 def delete(id):
