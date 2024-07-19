@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import func
 import pandas as pd
-import io
+import os
+import zipfile
 import base64
 import plotly.graph_objects as go
 
@@ -133,10 +134,42 @@ def ajouter_lot():
 # Route pour télécharger tous les lots
 @app.route('/telecharger-tous-les-lots', methods=['GET'])
 def telecharger_tous_les_lots():
-    lots = Lot.query.all()
-    data = []
-    for lot in lots:
+    try:
+        lots = Lot.query.all()
+        data = []
+        for lot in lots:
+            entries = lot.entries.all()
+            for entry in entries:
+                data.append({
+                    'Numéro du Lot': lot.numero,
+                    'Nom Édition': entry.nom_edition,
+                    'Type Édition': entry.type_edition,
+                    'Type Envoi': entry.type_envoie,
+                    'Nombre Pages Destinataire': entry.nombre_page_destinataire,
+                    'Nombre Destinataires': entry.nombre_destinataires,
+                    'Nombre Pages': entry.nombre_page,
+                })
+        df = pd.DataFrame(data)
+        file_path = 'lots.xlsx'
+        df.to_excel(file_path, index=False)
+
+        # Vérifiez si le fichier a bien été créé
+        if not os.path.exists(file_path):
+            flash("Erreur: Le fichier n'a pas été créé.", 'error')
+            return redirect(url_for('donnees_edition'))
+
+        return send_file(file_path, as_attachment=True)
+    except Exception as e:
+        flash(f"Erreur lors du téléchargement des fichiers : {str(e)}", 'error')
+        return redirect(url_for('donnees_edition'))
+
+# Route pour télécharger un lot spécifique
+@app.route('/telecharger-lot/<int:lot_id>', methods=['GET'])
+def telecharger_lot(lot_id):
+    try:
+        lot = Lot.query.get_or_404(lot_id)
         entries = lot.entries.all()
+        data = []
         for entry in entries:
             data.append({
                 'Numéro du Lot': lot.numero,
@@ -147,31 +180,69 @@ def telecharger_tous_les_lots():
                 'Nombre Destinataires': entry.nombre_destinataires,
                 'Nombre Pages': entry.nombre_page,
             })
-    df = pd.DataFrame(data)
-    file_path = 'lots.xlsx'
-    df.to_excel(file_path, index=False)
-    return send_file(file_path, as_attachment=True)
+        df = pd.DataFrame(data)
+        file_path = f'lot_{lot_id}.xlsx'
+        df.to_excel(file_path, index=False)
 
-# Route pour télécharger un lot spécifique
-@app.route('/telecharger-lot/<int:lot_id>', methods=['GET'])
-def telecharger_lot(lot_id):
-    lot = Lot.query.get_or_404(lot_id)
-    entries = lot.entries.all()
-    data = []
-    for entry in entries:
-        data.append({
-            'Numéro du Lot': lot.numero,
-            'Nom Édition': entry.nom_edition,
-            'Type Édition': entry.type_edition,
-            'Type Envoi': entry.type_envoie,
-            'Nombre Pages Destinataire': entry.nombre_page_destinataire,
-            'Nombre Destinataires': entry.nombre_destinataires,
-            'Nombre Pages': entry.nombre_page,
-        })
-    df = pd.DataFrame(data)
-    file_path = f'lot_{lot_id}.xlsx'
-    df.to_excel(file_path, index=False)
-    return send_file(file_path, as_attachment=True)
+        # Vérifiez si le fichier a bien été créé
+        if not os.path.exists(file_path):
+            flash("Erreur: Le fichier n'a pas été créé.", 'error')
+            return redirect(url_for('donnees_edition'))
+
+        return send_file(file_path, as_attachment=True)
+    except Exception as e:
+        flash(f"Erreur lors du téléchargement du lot : {str(e)}", 'error')
+        return redirect(url_for('donnees_edition'))
+
+# Route pour télécharger les lots sélectionnés
+@app.route('/telecharger-lots-selectionnes', methods=['POST'])
+def telecharger_lots_selectionnes():
+    try:
+        # Récupérer les IDs des lots sélectionnés depuis le formulaire
+        lot_ids = request.form.getlist('lots')
+        
+        if not lot_ids:
+            flash("Aucun lot sélectionné pour le téléchargement.", 'warning')
+            return redirect(url_for('donnees_edition'))
+
+        # Préparer les fichiers Excel pour chaque lot sélectionné
+        file_paths = []
+        for lot_id in lot_ids:
+            lot = Lot.query.get_or_404(lot_id)
+            entries = lot.entries.all()
+            data = []
+            for entry in entries:
+                data.append({
+                    'Numéro du Lot': lot.numero,
+                    'Nom Édition': entry.nom_edition,
+                    'Type Édition': entry.type_edition,
+                    'Type Envoi': entry.type_envoie,
+                    'Nombre Pages Destinataire': entry.nombre_page_destinataire,
+                    'Nombre Destinataires': entry.nombre_destinataires,
+                    'Nombre Pages': entry.nombre_page,
+                })
+            df = pd.DataFrame(data)
+            file_path = f'lot_{lot_id}.xlsx'
+            df.to_excel(file_path, index=False)
+            file_paths.append(file_path)
+
+        # Créer un fichier ZIP contenant tous les fichiers Excel
+        zip_file_path = 'lots_selectionnes.zip'
+        with zipfile.ZipFile(zip_file_path, 'w') as zipf:
+            for file_path in file_paths:
+                zipf.write(file_path)
+                os.remove(file_path)  # Supprimer le fichier après l'ajouter au ZIP
+
+        # Vérifiez si le fichier ZIP a bien été créé
+        if not os.path.exists(zip_file_path):
+            flash("Erreur: Le fichier ZIP n'a pas été créé.", 'error')
+            return redirect(url_for('donnees_edition'))
+
+        return send_file(zip_file_path, as_attachment=True)
+
+    except Exception as e:
+        flash(f"Erreur lors du téléchargement des lots sélectionnés : {str(e)}", 'error')
+        return redirect(url_for('donnees_edition'))
 
 # Route pour la page de rapport
 @app.route('/rapport')
@@ -199,6 +270,8 @@ def rapport():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
 
 
