@@ -85,8 +85,9 @@
 <div class="container mt-4">
     <h1 class="mb-4">Données d'édition</h1>
 
-    <!-- Débogage -->
-    <p>Nombre de lots : {{ lots|length }}</p>
+    <div class="mb-3">
+        <a href="{{ url_for('telecharger_tous_les_lots') }}" class="btn btn-success">Télécharger tous les lots</a>
+    </div>
 
     {% if lots %}
     <table class="table table-striped">
@@ -104,6 +105,7 @@
             <td>{{ lot.date_creation.strftime('%Y-%m-%d') }}</td>
             <td>
                 <a href="#" class="btn btn-sm btn-primary voir-details" onclick="voirDetails({{ lot.id }})">Voir</a>
+                <a href="{{ url_for('telecharger_lot', lot_id=lot.id) }}" class="btn btn-sm btn-success">Télécharger</a>
                 <a href="#" class="btn btn-sm btn-warning">Modifier</a>
                 <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
             </td>
@@ -116,3 +118,4 @@
     {% endif %}
 </div>
 {% endblock %}
+

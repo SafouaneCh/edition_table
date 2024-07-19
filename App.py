@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import func
-
+import pandas as pd 
+from flask import send_file
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -102,6 +103,50 @@ def ajouter_lot():
 
     last_lot = Lot.query.order_by(Lot.id.desc()).first()
     return render_template('ajouter_lot.html', last_lot=last_lot)
+@app.route('/donnees_edition')
+def donnees_edition():
+     lots = Lot.query.all()  # Récupérer tous les lots
+     return render_template('donnees_edition.html', lots=lots)
+
+@app.route('/telecharger-tous-les-lots', methods=['GET'])
+def telecharger_tous_les_lots():
+    lots = Lot.query.all()
+    data = []
+    for lot in lots:
+        entries = lot.entries.all()
+        for entry in entries:
+            data.append({
+                'Numéro du Lot': lot.numero,
+                'Nom Édition': entry.nom_edition,
+                'Type Édition': entry.type_edition,
+                'Type Envoi': entry.type_envoie,
+                'Nombre Pages Destinataire': entry.nombre_page_destinataire,
+                'Nombre Destinataires': entry.nombre_destinataires,
+                'Nombre Pages': entry.nombre_page,
+            })
+    df = pd.DataFrame(data)
+    file_path = 'lots.xlsx'
+    df.to_excel(file_path, index=False)
+    return send_file(file_path, as_attachment=True)
+@app.route('/telecharger-lot/<int:lot_id>', methods=['GET'])
+def telecharger_lot(lot_id):
+    lot = Lot.query.get_or_404(lot_id)
+    entries = lot.entries.all()
+    data = []
+    for entry in entries:
+        data.append({
+            'Numéro du Lot': lot.numero,
+            'Nom Édition': entry.nom_edition,
+            'Type Édition': entry.type_edition,
+            'Type Envoi': entry.type_envoie,
+            'Nombre Pages Destinataire': entry.nombre_page_destinataire,
+            'Nombre Destinataires': entry.nombre_destinataires,
+            'Nombre Pages': entry.nombre_page,
+        })
+    df = pd.DataFrame(data)
+    file_path = f'lot_{lot_id}.xlsx'
+    df.to_excel(file_path, index=False)
+    return send_file(file_path, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
