@@ -85,9 +85,12 @@
 <div class="container mt-4">
     <h1 class="mb-4">Données d'édition</h1>
 
-    <div class="mb-3">
-        <a href="{{ url_for('telecharger_tous_les_lots') }}" class="btn btn-success">Télécharger tous les lots</a>
-    </div>
+    <!-- Débogage -->
+    <p>Nombre de lots : {{ lots|length }}</p>
+
+    <!-- Boutons pour télécharger les lots -->
+    <a href="{{ url_for('telecharger_tous_les_lots') }}" class="btn btn-success">Télécharger tous les lots</a>
+    <a href="#" class="btn btn-primary" onclick="alert('Sélectionner un lot à télécharger.');">Choisir un lot</a>
 
     {% if lots %}
     <table class="table table-striped">
@@ -104,10 +107,8 @@
             <td>{{ lot.numero }}</td>
             <td>{{ lot.date_creation.strftime('%Y-%m-%d') }}</td>
             <td>
-                <a href="#" class="btn btn-sm btn-primary voir-details" onclick="voirDetails({{ lot.id }})">Voir</a>
-                <a href="{{ url_for('telecharger_lot', lot_id=lot.id) }}" class="btn btn-sm btn-success">Télécharger</a>
-                <a href="#" class="btn btn-sm btn-warning">Modifier</a>
-                <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
+                <a href="#" class="btn btn-sm btn-primary" onclick="voirDetails({{ lot.id }})">Voir</a>
+                <a href="{{ url_for('telecharger_lot', lot_id=lot.id) }}" class="btn btn-sm btn-warning">Télécharger</a>
             </td>
         </tr>
         {% endfor %}

@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import func
 import pandas as pd 
-from flask import send_file
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -48,6 +48,30 @@ with app.app_context():
 def index():
     lots = Lot.query.all()
     return render_template('index.html', lots=lots)
+
+# Route pour la page données d'édition
+@app.route('/donnees-édition')
+def donnees_edition():
+    lots = Lot.query.all()
+    return render_template('donnees_edition.html', lots=lots)
+
+# Route pour obtenir les détails d'un lot
+@app.route('/lot-details/<int:lot_id>', methods=['GET'])
+def lot_details(lot_id):
+    lot = Lot.query.get_or_404(lot_id)
+    entries = LotEntry.query.filter_by(lot_id=lot_id).all()
+    data = {
+        'numero': lot.numero,
+        'entries': [{
+            'nom_edition': entry.nom_edition,
+            'type_edition': entry.type_edition,
+            'type_envoie': entry.type_envoie,
+            'nombre_page_destinataire': entry.nombre_page_destinataire,
+            'nombre_destinataires': entry.nombre_destinataires,
+            'nombre_page': entry.nombre_page
+        } for entry in entries]
+    }
+    return jsonify(data)
 
 # Route pour ajouter un nouveau lot
 @app.route('/ajouter-lot', methods=['GET', 'POST'])
@@ -103,11 +127,8 @@ def ajouter_lot():
 
     last_lot = Lot.query.order_by(Lot.id.desc()).first()
     return render_template('ajouter_lot.html', last_lot=last_lot)
-@app.route('/donnees_edition')
-def donnees_edition():
-     lots = Lot.query.all()  # Récupérer tous les lots
-     return render_template('donnees_edition.html', lots=lots)
 
+# Route pour télécharger tous les lots
 @app.route('/telecharger-tous-les-lots', methods=['GET'])
 def telecharger_tous_les_lots():
     lots = Lot.query.all()
@@ -128,6 +149,8 @@ def telecharger_tous_les_lots():
     file_path = 'lots.xlsx'
     df.to_excel(file_path, index=False)
     return send_file(file_path, as_attachment=True)
+
+# Route pour télécharger un lot spécifique
 @app.route('/telecharger-lot/<int:lot_id>', methods=['GET'])
 def telecharger_lot(lot_id):
     lot = Lot.query.get_or_404(lot_id)
@@ -150,4 +173,5 @@ def telecharger_lot(lot_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
