@@ -52,41 +52,45 @@ def index():
 @app.route('/ajouter-lot', methods=['GET', 'POST'])
 def ajouter_lot():
     if request.method == 'POST':
-        print("POST request received") # Pour le débogage
-        print(request.form) # Pour voir les données du formulaire
         lot = Lot(numero=Lot.get_next_numero())
         db.session.add(lot)
         db.session.flush()  # Pour obtenir l'ID du lot
 
-        nom_edition = request.form.get('nom_edition')
-        type_edition = request.form.get('type_edition')
-        type_envoie = request.form.get('type_envoie')
-        nombre_page_destinataire_str = request.form.get('nombre_page_destinataire')
-        nombre_destinataires_str = request.form.get('nombre_destinataires')
+        entries = []
+        entry_count = len([key for key in request.form.keys() if key.startswith('nom_edition_')])
+        
+        for i in range(1, entry_count + 1):
+            nom_edition = request.form.get(f'nom_edition_{i}')
+            type_edition = request.form.get(f'type_edition_{i}')
+            type_envoie = request.form.get(f'type_envoie_{i}')
+            nombre_page_destinataire_str = request.form.get(f'nombre_page_destinataire_{i}')
+            nombre_destinataires_str = request.form.get(f'nombre_destinataires_{i}')
+            nombre_pages_str = request.form.get(f'nombre_pages_{i}')
 
-        if not all([nom_edition, type_edition, type_envoie, nombre_page_destinataire_str, nombre_destinataires_str]):
-            flash("Erreur: Tous les champs sont requis", 'error')
-            return redirect(url_for('ajouter_lot'))
+            if not all([nom_edition, type_edition, type_envoie, nombre_page_destinataire_str, nombre_destinataires_str, nombre_pages_str]):
+                flash("Erreur: Tous les champs sont requis", 'error')
+                return redirect(url_for('ajouter_lot'))
 
-        try:
-            nombre_page_destinataire = int(nombre_page_destinataire_str)
-            nombre_destinataires = int(nombre_destinataires_str)
-        except ValueError:
-            flash("Erreur: Les valeurs numériques sont invalides", 'error')
-            return redirect(url_for('ajouter_lot'))
+            try:
+                nombre_page_destinataire = int(nombre_page_destinataire_str)
+                nombre_destinataires = int(nombre_destinataires_str)
+                nombre_page = int(nombre_pages_str)
+            except ValueError:
+                flash("Erreur: Les valeurs numériques sont invalides", 'error')
+                return redirect(url_for('ajouter_lot'))
 
-        nombre_page = nombre_page_destinataire * nombre_destinataires
+            entry = LotEntry(
+                lot_id=lot.id,
+                nom_edition=nom_edition,
+                type_edition=type_edition,
+                type_envoie=type_envoie,
+                nombre_page_destinataire=nombre_page_destinataire,
+                nombre_destinataires=nombre_destinataires,
+                nombre_page=nombre_page
+            )
+            entries.append(entry)
 
-        entry = LotEntry(
-            lot_id=lot.id,
-            nom_edition=nom_edition,
-            type_edition=type_edition,
-            type_envoie=type_envoie,
-            nombre_page_destinataire=nombre_page_destinataire,
-            nombre_destinataires=nombre_destinataires,
-            nombre_page=nombre_page
-        )
-        db.session.add(entry)
+        db.session.add_all(entries)
 
         try:
             db.session.commit()
@@ -101,3 +105,4 @@ def ajouter_lot():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
