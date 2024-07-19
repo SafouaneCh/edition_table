@@ -11,23 +11,26 @@
                 'Accept': 'application/json',
             },
         })
-        .then(response => {
-            console.log('Réponse brute:', response);
-            if (!response.ok) {
-                throw new Error('Réponse réseau non OK');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Données parsées:', data);
-            let modal = createDetailModal(data);
-            document.body.appendChild(modal);
-            $(modal).modal('show');
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Une erreur s\'est produite lors de la récupération des détails du lot.');
-        });
+            .then(response => {
+                console.log('Réponse brute:', response);
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Données parsées:', data);
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                let modal = createDetailModal(data);
+                document.body.appendChild(modal);
+                $(modal).modal('show');
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert(`Une erreur s'est produite lors de la récupération des détails du lot: ${error.message || error}`);
+            });
     }
 
     function createDetailModal(data) {
@@ -143,7 +146,7 @@
             <td>{{ lot.numero }}</td>
             <td>{{ lot.date_creation.strftime('%Y-%m-%d') }}</td>
             <td>
-                <a href="#" class="btn btn-sm btn-primary" onclick="voirDetails({{ lot.id }})">Voir</a>
+                <a href="{{ url_for('voir_lot', lot_id=lot.id) }}" class="btn btn-sm btn-primary">Voir</a>
                 <a href="{{ url_for('telecharger_lot', lot_id=lot.id) }}" class="btn btn-sm btn-warning">Télécharger</a>
             </td>
         </tr>

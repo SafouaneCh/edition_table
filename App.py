@@ -7,6 +7,10 @@ import os
 import zipfile
 import base64
 import plotly.graph_objects as go
+from flask_cors import CORS  # Ajoutez cet import
+
+app = Flask(__name__)
+CORS(app)
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -61,20 +65,26 @@ def donnees_edition():
 # Route pour obtenir les détails d'un lot
 @app.route('/lot-details/<int:lot_id>', methods=['GET'])
 def lot_details(lot_id):
-    lot = Lot.query.get_or_404(lot_id)
-    entries = LotEntry.query.filter_by(lot_id=lot_id).all()
-    data = {
-        'numero': lot.numero,
-        'entries': [{
-            'nom_edition': entry.nom_edition,
-            'type_edition': entry.type_edition,
-            'type_envoie': entry.type_envoie,
-            'nombre_page_destinataire': entry.nombre_page_destinataire,
-            'nombre_destinataires': entry.nombre_destinataires,
-            'nombre_page': entry.nombre_page
-        } for entry in entries]
-    }
-    return jsonify(data)
+    app.logger.info(f"Demande de détails pour le lot {lot_id}")
+    try:
+        lot = Lot.query.get_or_404(lot_id)
+        entries = LotEntry.query.filter_by(lot_id=lot_id).all()
+        data = {
+            'numero': lot.numero,
+            'entries': [{
+                'nom_edition': entry.nom_edition,
+                'type_edition': entry.type_edition,
+                'type_envoie': entry.type_envoie,
+                'nombre_page_destinataire': entry.nombre_page_destinataire,
+                'nombre_destinataires': entry.nombre_destinataires,
+                'nombre_page': entry.nombre_page
+            } for entry in entries]
+        }
+        app.logger.info(f"Données du lot {lot_id} récupérées avec succès")
+        return jsonify(data)
+    except Exception as e:
+        app.logger.error(f"Erreur lors de la récupération des détails du lot {lot_id}: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 # Route pour ajouter un nouveau lot
 @app.route('/ajouter-lot', methods=['GET', 'POST'])
@@ -267,6 +277,11 @@ def rapport():
     img_base64 = base64.b64encode(img_bytes).decode('utf-8')
 
     return render_template('rapport.html', graph_img=img_base64)
+
+@app.route('/lot/<int:lot_id>')
+def voir_lot(lot_id):
+    lot = Lot.query.get_or_404(lot_id)
+    return render_template('lot_details.html', lot=lot)
 
 if __name__ == '__main__':
     app.run(debug=True)
