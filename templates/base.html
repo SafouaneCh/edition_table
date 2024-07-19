@@ -74,7 +74,50 @@
         </nav>
 
         <div class="container-fluid">
-            {% block body %}{% endblock %}
+            {% block body %}
+            <div class="container mt-4">
+                <h1 class="mb-4">Ajouter un nouveau Lot</h1>
+                <form id="lot-form" method="post" action="{{ url_for('ajouter_lot') }}">
+                    <div id="entries-container">
+                        <div class="entry">
+                            <h3>Entrée 1</h3>
+                            <div class="form-group">
+                                <label for="nom_edition_1">Nom Edition</label>
+                                <input type="text" class="form-control" id="nom_edition_1" name="nom_edition_1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="type_edition_1">Type Edition</label>
+                                <select class="form-control" id="type_edition_1" name="type_edition_1" required>
+                                    <option value="Recto">Recto</option>
+                                    <option value="Recto/Verso">Recto/Verso</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="type_envoie_1">Type d'envoie</label>
+                                <select class="form-control" id="type_envoie_1" name="type_envoie_1" required>
+                                    <option value="Normal">Normal</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre_page_destinataire_1">Nombre Page par Destinataire</label>
+                                <input type="number" class="form-control" id="nombre_page_destinataire_1" name="nombre_page_destinataire_1" required onchange="updateNombrePages(1)">
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre_destinataires_1">Nombre Destinataires</label>
+                                <input type="number" class="form-control" id="nombre_destinataires_1" name="nombre_destinataires_1" required onchange="updateNombrePages(1)">
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre_page_1">Nombre de Pages</label>
+                                <input type="number" class="form-control" id="nombre_page_1" name="nombre_page_1" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addEntry()">Ajouter une nouvelle entrée</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmLot()">Sauvegarder le Lot</button>
+                </form>
+            </div>
+            {% endblock %}
         </div>
     </div>
 </div>
@@ -87,6 +130,56 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
+    let entryCount = 1;
+
+    function addEntry() {
+        entryCount++;
+        const container = document.getElementById('entries-container');
+        const entryHtml = `
+            <div class="entry">
+                <h3>Entrée ${entryCount}</h3>
+                <div class="form-group">
+                    <label for="nom_edition_${entryCount}">Nom Edition</label>
+                    <input type="text" class="form-control" id="nom_edition_${entryCount}" name="nom_edition_${entryCount}" required>
+                </div>
+                <div class="form-group">
+                    <label for="type_edition_${entryCount}">Type Edition</label>
+                    <select class="form-control" id="type_edition_${entryCount}" name="type_edition_${entryCount}" required>
+                        <option value="Recto">Recto</option>
+                        <option value="Recto/Verso">Recto/Verso</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="type_envoie_${entryCount}">Type d'envoie</label>
+                    <select class="form-control" id="type_envoie_${entryCount}" name="type_envoie_${entryCount}" required>
+                        <option value="Normal">Normal</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nombre_page_destinataire_${entryCount}">Nombre Page par Destinataire</label>
+                    <input type="number" class="form-control" id="nombre_page_destinataire_${entryCount}" name="nombre_page_destinataire_${entryCount}" required onchange="updateNombrePages(${entryCount})">
+                </div>
+                <div class="form-group">
+                    <label for="nombre_destinataires_${entryCount}">Nombre Destinataires</label>
+                    <input type="number" class="form-control" id="nombre_destinataires_${entryCount}" name="nombre_destinataires_${entryCount}" required onchange="updateNombrePages(${entryCount})">
+                </div>
+                <div class="form-group">
+                    <label for="nombre_page_${entryCount}">Nombre de Pages</label>
+                    <input type="number" class="form-control" id="nombre_page_${entryCount}" name="nombre_page_${entryCount}" readonly>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', entryHtml);
+    }
+
+    function updateNombrePages(index) {
+        const nbPagesDest = parseInt(document.getElementById(`nombre_page_destinataire_${index}`).value) || 0;
+        const nbDest = parseInt(document.getElementById(`nombre_destinataires_${index}`).value) || 0;
+        const nbPages = nbPagesDest * nbDest;
+        document.getElementById(`nombre_page_${index}`).value = nbPages;
+    }
+
     $(document).ready(function () {
         $('#sidebarCollapse').on('click', function () {
             $('#sidebar, #content').toggleClass('active');
