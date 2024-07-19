@@ -2,7 +2,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import func
-import pandas as pd 
+import pandas as pd
+import io
+import base64
+import plotly.graph_objects as go
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -22,7 +25,6 @@ class Lot(db.Model):
     def get_next_numero(cls):
         max_numero = db.session.query(func.max(cls.numero)).scalar()
         if max_numero:
-            # Assuming the format is 'LOT-XXXXXX'
             max_num = int(max_numero.split('-')[1])
             next_num = max_num + 1
         else:
@@ -171,7 +173,33 @@ def telecharger_lot(lot_id):
     df.to_excel(file_path, index=False)
     return send_file(file_path, as_attachment=True)
 
+# Route pour la page de rapport
+@app.route('/rapport')
+def rapport():
+    # Obtenir les données des lots par heure
+    lots = Lot.query.with_entities(func.strftime('%Y-%m-%d %H:00:00', Lot.date_creation).label('hour'), func.count(Lot.id).label('count')).group_by(func.strftime('%Y-%m-%d %H:00:00', Lot.date_creation)).all()
+
+    hours = [lot.hour for lot in lots]
+    counts = [lot.count for lot in lots]
+
+    # Créer le graphique
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=hours, y=counts))
+    fig.update_layout(
+        title='Nombre de Lots Créés par Heure',
+        xaxis_title='Heure',
+        yaxis_title='Nombre de Lots'
+    )
+
+    # Convertir le graphique en image PNG base64
+    img_bytes = fig.to_image(format='png')
+    img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+
+    return render_template('rapport.html', graph_img=img_base64)
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
 
