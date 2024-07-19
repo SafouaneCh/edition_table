@@ -1,43 +1,189 @@
-{% extends 'base.html' %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CNSS Application</title>
 
-{% block body %}
-<div class="container mt-4">
-    <h1 class="mb-4">Liste des Lots</h1>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="static/css/sidebar.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
-    {% for lot in lots %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>Lot #{{ lot.numero }} - {{ lot.date_creation.strftime('%Y-%m-%d') }}</h2>
-            <p>Nombre d'entrées : {{ lot.entries.count() }}</p>
+        .welcome-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom, #f0f0f0, #ffffff); /* Dégradé du gris clair au blanc */
+            color: #000000; /* Texte noir */
+            text-align: center;
+            overflow: hidden; /* Assure que l'animation reste dans les limites de la vue */
+        }
+
+        .welcome-content {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1.5s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-section h1 {
+            font-size: 4rem; /* Texte plus grand */
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: scaleIn 1s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .welcome-section p {
+            font-size: 1.5rem; /* Texte plus grand */
+            font-weight: 300;
+            margin-top: 0;
+            animation: fadeIn 1.5s ease-out 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .welcome-image {
+            margin-top: 20px;
+            animation: fadeInImage 1s ease-out 1.5s forwards;
+        }
+
+        @keyframes fadeInImage {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar-fixed">
+        <div class="sidebar-header">
+            <img src="static/images/cnss-logo-2E8DFFBB2A-seeklogo.com.png" alt="CNSS LOGO" class="img-fluid">
         </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Nom Edition</th>
-                    <th>Type Edition</th>
-                    <th>Type d'envoi</th>
-                    <th>Nombre Page par Destinataire</th>
-                    <th>Nombre Destinataires</th>
-                    <th>Nombre Page</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for entry in lot.entries %}
-                <tr>
-                    <td>{{ entry.nom_edition }}</td>
-                    <td>{{ entry.type_edition }}</td>
-                    <td>{{ entry.type_envoie }}</td>
-                    <td>{{ entry.nombre_page_destinataire }}</td>
-                    <td>{{ entry.nombre_destinataires }}</td>
-                    <td>{{ entry.nombre_page }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+       
+        <ul class="list-unstyled components">
+            <li>
+                <a href="/"><i class="fas fa-home"></i> Bienvenue</a>
+            </li>
+            <li>
+                <a href="#taskSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                    <i class="fas fa-tasks"></i> Taches
+                </a>
+                <ul class="collapse list-unstyled" id="taskSubmenu">
+                    <li>
+                        <a href="{{ url_for('ajouter_lot') }}">Ajouter un nouveau Lot</a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('donnees_edition') }}">Données d'édition</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="active">
+                <a href="/rapport"><i class="fas fa-chart-bar"></i> Rapport</a>
+            </li>
+            <li>
+                <a href="/settings"><i class="fas fa-cog"></i> Paramètres</a>
+            </li>
+        </ul>
+    
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn btn-info">
+                    <i class="fas fa-align-left"></i>
+                    <span></span>
+                </button>
+                <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fas fa-align-justify"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="#">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="welcome-section">
+            <div class="welcome-content">
+                <h1>Bienvenue dans l'application CNSS</h1>
+                <p>Votre gestion simplifiée et optimisée</p>
+            </div>
+            <img src="https://seeklogo.com/images/C/cnss-logo-2E8DFFBB2A-seeklogo.com.png" alt="CNSS Logo" class="welcome-image" style="width: 200px; height: auto;">
         </div>
     </div>
-    {% endfor %}
 </div>
-{% endblock %}
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar, #content').toggleClass('active');
+        });
+    });
+</script>
+</body>
+</html>
+
+
+
 

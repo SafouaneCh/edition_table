@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails du Lot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Détails du Lot</h1>
+        <h2>Numéro du Lot : {{ lot.numero }}</h2>
+        <h3>Entrées du Lot</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nom Édition</th>
+                        <th>Type Édition</th>
+                        <th>Type Envoi</th>
+                        <th>Nombre Pages Destinataire</th>
+                        <th>Nombre Destinataires</th>
+                        <th>Nombre Pages</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                    <tr>
+                        <td>{{ entry.nom_edition }}</td>
+                        <td>{{ entry.type_edition }}</td>
+                        <td>{{ entry.type_envoie }}</td>
+                        <td>{{ entry.nombre_page_destinataire }}</td>
+                        <td>{{ entry.nombre_destinataires }}</td>
+                        <td>{{ entry.nombre_page }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{{ url_for('donnees_edition') }}" class="btn btn-secondary mt-3">Retour</a>
+    </div>
+</body>
+</html>
+
