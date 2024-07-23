@@ -4,46 +4,70 @@
 
 <div class="container mt-4">
     <h1 class="mb-4">Ajouter un nouveau Lot</h1>
-    <form id="lot-form" method="post">
+    <form id="lot-form" method="post" action="{{ url_for('ajouter_lot') }}">
+        <input type="hidden" name="lot_data" id="lot_data">
         <div id="entries-container">
             <!-- Champ d'entrée par défaut -->
             <div class="entry">
                 <h3>Entrée 1</h3>
-                <div class="form-group">
-                    <label for="nom_edition_1">Nom Edition</label>
-                    <input type="text" class="form-control" id="nom_edition_1" name="nom_edition_1" required>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="nom_edition_1">Nom Edition</label>
+                        <input type="text" class="form-control" id="nom_edition_1" name="nom_edition_1" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="type_edition_1">Type Edition</label>
+                        <select class="form-control" id="type_edition_1" name="type_edition_1" required>
+                            <option value="Recto">Recto</option>
+                            <option value="Recto/Verso">Recto/Verso</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="type_envoie_1">Type d'envoie</label>
+                        <select class="form-control" id="type_envoie_1" name="type_envoie_1" required>
+                            <option value="Normal">Normal</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="type_edition_1">Type Edition</label>
-                    <select class="form-control" id="type_edition_1" name="type_edition_1" required>
-                        <option value="Recto">Recto</option>
-                        <option value="Recto/Verso">Recto/Verso</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="type_envoie_1">Type d'envoie</label>
-                    <select class="form-control" id="type_envoie_1" name="type_envoie_1" required>
-                        <option value="Normal">Normal</option>
-                        <option value="Autre">Autre</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="nombre_page_destinataire_1">Nombre Page par Destinataire</label>
-                    <input type="number" class="form-control" id="nombre_page_destinataire_1" name="nombre_page_destinataire_1" required oninput="calculatePages(this)">
-                </div>
-                <div class="form-group">
-                    <label for="nombre_destinataires_1">Nombre Destinataires</label>
-                    <input type="number" class="form-control" id="nombre_destinataires_1" name="nombre_destinataires_1" required oninput="calculatePages(this)">
-                </div>
-                <div class="form-group">
-                    <label for="nombre_pages_1">Nombre de Pages</label>
-                    <input type="number" class="form-control" id="nombre_pages_1" name="nombre_pages_1" readonly>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="nombre_page_destinataire_1">Nombre Page par Destinataire</label>
+                        <input type="number" class="form-control" id="nombre_page_destinataire_1" name="nombre_page_destinataire_1" required oninput="calculatePages(this)">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="nombre_destinataires_1">Nombre Destinataires</label>
+                        <input type="number" class="form-control" id="nombre_destinataires_1" name="nombre_destinataires_1" required oninput="calculatePages(this)">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="nombre_pages_1">Nombre de Pages</label>
+                        <input type="number" class="form-control" id="nombre_pages_1" name="nombre_pages_1" readonly>
+                    </div>
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-secondary" onclick="addEntry()">Ajouter une nouvelle entrée</button>
-        <button type="button" class="btn btn-primary" onclick="confirmLot()">Sauvegarder le Lot</button>
+        <button type="button" class="btn btn-secondary mr-2" onclick="addEntry()">Ajouter une nouvelle entrée</button>
+        <button type="button" class="btn btn-primary" onclick="previewLot()">Prévisualiser le Lot</button>
     </form>
+    <div id="lot-preview" style="display: none;">
+        <h2 class="mt-4">Aperçu du Lot</h2>
+        <table class="table table-bordered mt-3">
+            <thead>
+            <tr>
+                <th>Nom Edition</th>
+                <th>Type Edition</th>
+                <th>Type d'envoie</th>
+                <th>Nombre Page par Destinataire</th>
+                <th>Nombre Destinataires</th>
+                <th>Nombre de Pages</th>
+            </tr>
+            </thead>
+            <tbody id="lot-preview-body">
+            <!-- Les données seront insérées ici par JavaScript -->
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-success" onclick="confirmSave()">Sauvegarder le Lot</button>
+    </div>
 </div>
 
 <script>
@@ -52,58 +76,103 @@
     function addEntry() {
         entryCount++;
         const container = document.getElementById('entries-container');
-        const entryHtml = `
-            <div class="entry">
-                <h3>Entrée ${entryCount}</h3>
-                <div class="form-group">
-                    <label for="nom_edition_${entryCount}">Nom Edition</label>
-                    <input type="text" class="form-control" id="nom_edition_${entryCount}" name="nom_edition_${entryCount}" required>
-                </div>
-                <div class="form-group">
-                    <label for="type_edition_${entryCount}">Type Edition</label>
-                    <select class="form-control" id="type_edition_${entryCount}" name="type_edition_${entryCount}" required>
-                        <option value="Recto">Recto</option>
-                        <option value="Recto/Verso">Recto/Verso</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="type_envoie_${entryCount}">Type d'envoie</label>
-                    <select class="form-control" id="type_envoie_${entryCount}" name="type_envoie_${entryCount}" required>
-                        <option value="Normal">Normal</option>
-                        <option value="Autre">Autre</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="nombre_page_destinataire_${entryCount}">Nombre Page par Destinataire</label>
-                    <input type="number" class="form-control" id="nombre_page_destinataire_${entryCount}" name="nombre_page_destinataire_${entryCount}" required oninput="calculatePages(this)">
-                </div>
-                <div class="form-group">
-                    <label for="nombre_destinataires_${entryCount}">Nombre Destinataires</label>
-                    <input type="number" class="form-control" id="nombre_destinataires_${entryCount}" name="nombre_destinataires_${entryCount}" required oninput="calculatePages(this)">
-                </div>
-                <div class="form-group">
-                    <label for="nombre_pages_${entryCount}">Nombre de Pages</label>
-                    <input type="number" class="form-control" id="nombre_pages_${entryCount}" name="nombre_pages_${entryCount}" readonly>
-                </div>
+        const newEntry = document.createElement('div');
+        newEntry.className = 'entry';
+        newEntry.innerHTML = `
+        <h3>Entrée ${entryCount}</h3>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="nom_edition_${entryCount}">Nom Edition</label>
+                <input type="text" class="form-control" id="nom_edition_${entryCount}" name="nom_edition_${entryCount}" required>
             </div>
-        `;
-        container.insertAdjacentHTML('beforeend', entryHtml);
+            <div class="col-md-4 mb-3">
+                <label for="type_edition_${entryCount}">Type Edition</label>
+                <select class="form-control" id="type_edition_${entryCount}" name="type_edition_${entryCount}" required>
+                    <option value="Recto">Recto</option>
+                    <option value="Recto/Verso">Recto/Verso</option>
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="type_envoie_${entryCount}">Type d'envoie</label>
+                <select class="form-control" id="type_envoie_${entryCount}" name="type_envoie_${entryCount}" required>
+                    <option value="Normal">Normal</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="nombre_page_destinataire_${entryCount}">Nombre Page par Destinataire</label>
+                <input type="number" class="form-control" id="nombre_page_destinataire_${entryCount}" name="nombre_page_destinataire_${entryCount}" required oninput="calculatePages(this)">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="nombre_destinataires_${entryCount}">Nombre Destinataires</label>
+                <input type="number" class="form-control" id="nombre_destinataires_${entryCount}" name="nombre_destinataires_${entryCount}" required oninput="calculatePages(this)">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="nombre_pages_${entryCount}">Nombre de Pages</label>
+                <input type="number" class="form-control" id="nombre_pages_${entryCount}" name="nombre_pages_${entryCount}" readonly>
+            </div>
+        </div>
+    `;
+        container.appendChild(newEntry);
+    }
+
+    function previewLot() {
+        const entries = document.querySelectorAll('.entry');
+        const previewBody = document.getElementById('lot-preview-body');
+        previewBody.innerHTML = '';
+
+        entries.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${document.getElementById('nom_edition_' + (index + 1)).value}</td>
+                <td>${document.getElementById('type_edition_' + (index + 1)).value}</td>
+                <td>${document.getElementById('type_envoie_' + (index + 1)).value}</td>
+                <td>${document.getElementById('nombre_page_destinataire_' + (index + 1)).value}</td>
+                <td>${document.getElementById('nombre_destinataires_' + (index + 1)).value}</td>
+                <td>${document.getElementById('nombre_pages_' + (index + 1)).value}</td>
+            `;
+            previewBody.appendChild(row);
+        });
+
+        document.getElementById('lot-preview').style.display = 'block';
     }
 
     function calculatePages(input) {
         const entry = input.closest('.entry');
-        const nombrePageDestinataire = entry.querySelector('[id^=nombre_page_destinataire]').value;
-        const nombreDestinataires = entry.querySelector('[id^=nombre_destinataires]').value;
+        const nombrePageDestinataire = parseInt(entry.querySelector('[id^=nombre_page_destinataire]').value) || 0;
+        const nombreDestinataires = parseInt(entry.querySelector('[id^=nombre_destinataires]').value) || 0;
         const nombrePages = entry.querySelector('[id^=nombre_pages]');
-        if (nombrePageDestinataire && nombreDestinataires) {
-            nombrePages.value = nombrePageDestinataire * nombreDestinataires;
-        } else {
-            nombrePages.value = 0;
-        }
+        nombrePages.value = nombrePageDestinataire * nombreDestinataires;
     }
 
     function confirmLot() {
         document.getElementById('lot-form').submit();
+    }
+
+    function confirmSave() {
+        if (confirm("Êtes-vous sûr de vouloir sauvegarder ce Lot ?")) {
+            // Capturer les données du tableau de prévisualisation
+            const previewRows = document.querySelectorAll('#lot-preview-body tr');
+            const lotData = Array.from(previewRows).map(row => {
+                const cells = row.querySelectorAll('td');
+                return {
+                    nom_edition: cells[0].textContent,
+                    type_edition: cells[1].textContent,
+                    type_envoie: cells[2].textContent,
+                    nombre_page_destinataire: cells[3].textContent,
+                    nombre_destinataires: cells[4].textContent,
+                    nombre_pages: cells[5].textContent
+                };
+            });
+
+            // Ajouter les données du lot au formulaire
+            document.getElementById('lot_data').value = JSON.stringify(lotData);
+
+            // Soumettre le formulaire
+            document.getElementById('lot-form').submit();
+        }
     }
 </script>
 {% endblock %}

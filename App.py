@@ -8,6 +8,7 @@ import zipfile
 import base64
 import plotly.graph_objects as go
 from flask_cors import CORS  # Ajoutez cet import
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -96,7 +97,7 @@ def ajouter_lot():
 
         entries = []
         entry_count = len([key for key in request.form.keys() if key.startswith('nom_edition_')])
-        
+
         for i in range(1, entry_count + 1):
             nom_edition = request.form.get(f'nom_edition_{i}')
             type_edition = request.form.get(f'type_edition_{i}')
@@ -133,7 +134,7 @@ def ajouter_lot():
         try:
             db.session.commit()
             flash('Lot ajouté avec succès!', 'success')
-            return redirect(url_for('index'))
+            return redirect(url_for('donnees_edition.html'))
         except Exception as e:
             db.session.rollback()
             flash(f"Erreur lors de l'ajout du lot : {str(e)}", 'error')
