@@ -4,17 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Données d'édition</title>
-     <!-- Bootstrap CSS -->
-     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-     <!-- Font Awesome -->
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-     <!-- Custom CSS -->
-     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-     <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
- 
-     {% block head %}{% endblock %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+
+    {% block head %}{% endblock %}
+    <style>
+        #content {
+            display: flex;
+            justify-content: center;
+        }
+        .content-container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        .button-group {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
 </head>
-<!-- Contenu principal -->
 <body>
 <div class="wrapper">
     <!-- Sidebar -->
@@ -50,68 +66,69 @@
 
     <!-- Page Content -->
     <div id="content">
-        <main role="main" class="container-fluid">
-            <div class="row">
-                <div class="col-md-9 ml-sm-auto col-lg-10 px-4">
-                    <div class="container mt-4">
-                        <h1 class="mb-4">Données d'édition</h1>
+        <div class="content-container">
+            <h1 class="mb-4">Données d'édition</h1>
 
-                        <!-- Débogage -->
-                        <p>Nombre de lots : {{ lots|length }}</p>
+            <!-- Débogage -->
+            <p class="text-center">Nombre de lots : {{ lots|length }}</p>
 
-                        <!-- Boutons pour télécharger les lots -->
-                        <a href="{{ url_for('telecharger_tous_les_lots') }}" class="btn btn-success">Télécharger tous les lots</a>
-                        <button class="btn btn-primary" onclick="telechargerSelection()">Télécharger les sélectionnés</button>
-
-                        {% if lots %}
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>Sélectionner</th>
-                                <th>Numéro du Lot</th>
-                                <th>Date de création</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for lot in lots %}
-                            <tr>
-                                <td><input type="checkbox" name="lot" value="{{ lot.id }}"></td>
-                                <td>{{ lot.numero }}</td>
-                                <td>{{ lot.date_creation.strftime('%Y-%m-%d') }}</td>
-                                <td>
-                                    <!-- Utilisation de voirDetails() pour ouvrir la fenêtre modale -->
-                                    <button type="button" class="btn btn-sm btn-primary" onclick="voirDetails('{{ lot.id }}')">Voir</button>
-                                    <a href="{{ url_for('telecharger_lot', lot_id=lot.id) }}" class="btn btn-sm btn-warning">Télécharger</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        {% else %}
-                        <p>Aucun lot trouvé.</p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Modal pour afficher les détails du lot -->
-                    <div id="detailModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="detailModalLabel">Détails du Lot</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Contenu des détails du lot inséré ici via JavaScript -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Boutons pour télécharger les lots -->
+            <div class="button-group">
+                <a href="{{ url_for('telecharger_tous_les_lots') }}" class="btn btn-success">Télécharger tous les lots</a>
+                <button class="btn btn-primary" onclick="telechargerSelection()">Télécharger les sélectionnés</button>
             </div>
-        </main>
+
+            {% if lots %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Sélectionner</th>
+                        <th>Numéro du Lot</th>
+                        <th>Date de création</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for lot in lots %}
+                    <tr>
+                        <td><input type="checkbox" name="lot" value="{{ lot.id }}"></td>
+                        <td>{{ lot.numero }}</td>
+                        <td>{{ lot.date_creation.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="voirDetails('{{ lot.id }}')" title="Voir les détails">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <a href="{{ url_for('telecharger_lot', lot_id=lot.id) }}" class="btn btn-sm btn-warning" title="Télécharger le lot">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center">Aucun lot trouvé.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour afficher les détails du lot -->
+<div id="detailModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Détails du Lot</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenu des détails du lot inséré ici via JavaScript -->
+            </div>
+        </div>
     </div>
 </div>
 
@@ -130,16 +147,16 @@
                 'Accept': 'application/json',
             },
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erreur lors de la récupération des détails du lot');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Remplir le contenu de la modal avec les détails du lot
-            let modalBody = document.querySelector('.modal-body');
-            modalBody.innerHTML = `
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des détails du lot');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Remplir le contenu de la modal avec les détails du lot
+                let modalBody = document.querySelector('.modal-body');
+                modalBody.innerHTML = `
                 <table class="table">
                     <thead>
                         <tr>
@@ -166,18 +183,18 @@
                 </table>
             `;
 
-            // Afficher la modal
-            $('#detailModal').modal('show');
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert(`Une erreur s'est produite lors de la récupération des détails du lot: ${error.message}`);
-        });
+                // Afficher la modal
+                $('#detailModal').modal('show');
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert(`Une erreur s'est produite lors de la récupération des détails du lot: ${error.message}`);
+            });
     }
 
     function telechargerSelection() {
         const selectedLots = Array.from(document.querySelectorAll('input[name="lot"]:checked'))
-                                  .map(checkbox => checkbox.value);
+            .map(checkbox => checkbox.value);
 
         if (selectedLots.length === 0) {
             alert('Veuillez sélectionner au moins un lot.');
@@ -191,26 +208,26 @@
             },
             body: JSON.stringify({ lots: selectedLots }),
         })
-        .then(response => {
-            if (response.ok) {
-                return response.blob();
-            } else {
-                throw new Error('Erreur lors du téléchargement des fichiers.');
-            }
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'lots_selectionnes.zip';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Une erreur s\'est produite lors du téléchargement des fichiers.');
-        });
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error('Erreur lors du téléchargement des fichiers.');
+                }
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'lots_selectionnes.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur s\'est produite lors du téléchargement des fichiers.');
+            });
     }
 
     $(document).ready(function () {
@@ -222,5 +239,3 @@
 
 </body>
 </html>
-
-

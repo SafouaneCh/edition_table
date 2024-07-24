@@ -72,17 +72,32 @@ body {
 }
 
 #content {
-    width: 100%;
+    width: calc(100% - 250px);
     padding: 20px;
     transition: all 0.3s;
     margin-left: 250px;
+    display: flex;
+    justify-content: center;
 }
 
 #content.active {
     margin-left: 0;
 }
 
+.content-container {
+    max-width: 1200px;
+    width: 100%;
+}
+
 .content {
+    background-color: var(--content-bg-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.table-container {
     background-color: var(--content-bg-color);
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -94,6 +109,7 @@ body {
 .table-custom {
     border-collapse: separate;
     border-spacing: 0;
+    width: 100%;
 }
 
 .table-custom thead th {
@@ -126,6 +142,15 @@ body {
     background-color: var(--sidebar-hover-color);
 }
 
+/* Centrer le titre et les boutons */
+h1, .button-group {
+    text-align: center;
+}
+
+.button-group {
+    margin-bottom: 20px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     #sidebar {
@@ -138,5 +163,6 @@ body {
     }
     #content {
         margin-left: 0;
+        width: 100%;
     }
 }
