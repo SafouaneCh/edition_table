@@ -8,7 +8,7 @@ import zipfile
 import base64
 import plotly.graph_objects as go
 from flask_cors import CORS  # Ajoutez cet import
-import json
+
 
 app = Flask(__name__)
 CORS(app)
