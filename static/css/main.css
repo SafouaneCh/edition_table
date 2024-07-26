@@ -76,12 +76,44 @@ body {
     padding: 20px;
     transition: all 0.3s;
     margin-left: 250px;
-    display: flex;
-    justify-content: center;
 }
 
-#content.active {
-    margin-left: 0;
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: var(--content-bg-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#sidebarCollapse {
+    background-color: transparent;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.profile-logout {
+    display: flex;
+    align-items: center;
+}
+
+.profile-logout .btn {
+    margin-left: 10px;
+}
+
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
 }
 
 .content-container {
@@ -155,14 +187,12 @@ h1, .button-group {
 @media (max-width: 768px) {
     #sidebar {
         margin-left: -250px;
-        transform: translateX(-250px);
-    }
-    #sidebar.active {
-        margin-left: 0;
-        transform: translateX(0);
     }
     #content {
         margin-left: 0;
         width: 100%;
+    }
+    #content.active {
+        margin-left: 250px;
     }
 }
