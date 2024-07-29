@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 from sqlalchemy import func
 import pandas as pd
 import os
@@ -8,6 +7,7 @@ import zipfile
 import base64
 import plotly.graph_objects as go
 from flask_cors import CORS  # Ajoutez cet import
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -58,9 +58,22 @@ def index():
     return render_template('index.html', lots=lots)
 
 # Route pour la page données d'édition
-@app.route('/donnees-édition')
+
+
+@app.route('/donnees-édition', methods=['GET', 'POST'])
 def donnees_edition():
-    lots = Lot.query.all()
+    if request.method == 'POST':
+        date_creation = request.form.get('dateCreation')
+
+        if date_creation:
+            date_debut = datetime.strptime(date_creation, '%Y-%m-%d')
+            date_fin = date_debut + timedelta(days=1)  # Pour inclure toute la journée
+            lots = Lot.query.filter(Lot.date_creation.between(date_debut, date_fin)).all()
+        else:
+            lots = Lot.query.all()
+    else:
+        lots = Lot.query.all()
+
     return render_template('donnees_edition.html', lots=lots)
 
 # Route pour obtenir les détails d'un lot
@@ -283,6 +296,29 @@ def rapport():
 def voir_lot(lot_id):
     lot = Lot.query.get_or_404(lot_id)
     return render_template('lot_details.html', lot=lot)
+
+from flask import request, jsonify
+
+@app.route('/rechercher-lots', methods=['POST'])
+def rechercher_lots():
+    data = request.json
+    date_debut = data.get('dateDebut')
+    date_fin = data.get('dateFin')
+
+    # Effectuez votre recherche dans la base de données ici
+    # Par exemple :
+    lots = Lot.query.filter(Lot.date_creation.between(date_debut, date_fin)).all()
+
+    # Convertissez les résultats en format JSON
+    resultats = [
+        {
+            'id': lot.id,
+            'numero': lot.numero,
+            'date_creation': lot.date_creation.isoformat()
+        } for lot in lots
+    ]
+
+    return jsonify(resultats)
 
 if __name__ == '__main__':
     app.run(debug=True)

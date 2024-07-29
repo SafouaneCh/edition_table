@@ -3,6 +3,17 @@
 {% block body %}
 <div class="container mt-4">
     <h1 class="mb-4">Données d'édition</h1>
+    <form method="POST" class="mb-4">
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                <label for="dateCreation">Date de création</label>
+                <input type="date" class="form-control" id="dateCreation" name="dateCreation">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary mt-4">Rechercher</button>
+            </div>
+        </div>
+    </form>
 
     <!-- Débogage -->
     <p class="text-center">Nombre de lots : {{ lots|length }}</p>
@@ -155,5 +166,48 @@
                 alert('Une erreur s\'est produite lors du téléchargement des fichiers.');
             });
     }
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const dateDebut = document.getElementById('dateDebut').value;
+        const dateFin = document.getElementById('dateFin').value;
+
+        fetch('/rechercher-lots', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ dateDebut, dateFin }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Mettre à jour le tableau avec les résultats de la recherche
+                const tbody = document.querySelector('tbody');
+                tbody.innerHTML = '';
+                data.forEach(lot => {
+                    tbody.innerHTML += `
+                <tr>
+                    <td><input type="checkbox" name="lot" value="${lot.id}"></td>
+                    <td>${lot.numero}</td>
+                    <td>${new Date(lot.date_creation).toLocaleDateString()}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="voirDetails('${lot.id}')" title="Voir les détails">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <a href="/telecharger-lot/${lot.id}" class="btn btn-sm btn-warning" title="Télécharger le lot">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </td>
+                </tr>
+            `;
+                });
+
+                // Mettre à jour le compteur de lots
+                document.querySelector('p.text-center').textContent = `Nombre de lots : ${data.length}`;
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur s\'est produite lors de la recherche des lots.');
+            });
+    });
 </script>
 {% endblock %}
